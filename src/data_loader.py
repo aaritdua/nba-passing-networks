@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster
+from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster, PlayByPlayV3
 from nba_api.stats.static import teams, players
 import pandas as pd
 import time
@@ -23,4 +23,10 @@ def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
     return result
 
 
-# def load_play_by_play(game_id: str) -> pd.DataFrame:
+def load_play_by_play(game_id: str) -> pd.DataFrame:
+    try:
+        result = pd.read_csv(f"../data/playbyplay_{game_id}.csv")
+    except:
+        result = PlayByPlayV3(game_id=game_id).get_data_frames()[0]
+        result.to_csv(f"../data/playbyplay_{game_id}.csv")
+    return result
