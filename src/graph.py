@@ -65,3 +65,35 @@ class WeightedDirectedGraphs:
         else:
             # We didn't find an existing vertex for both items.
             raise ValueError
+
+    def get_out_neighbors(self, item: Any) -> set:
+        """Return a set of the out-neighbours (A vertex that a given vertex has a directed edge to) of the given item.
+
+        Note that the *items* are returned, not the _WeightedDirectedVertex objects themselves.
+
+        Raise a ValueError if item does not appear as a vertex in this graph.
+        """
+        if item in self._vertices:
+            v = self._vertices[item]
+            return {neighbour.item for neighbour in v.neighbours}
+        else:
+            raise ValueError
+
+    def get_in_neighbors(self, item: Any) -> set:
+        """Return a set of the in-neighbours (A vertex that has a directed edge to the given vertex) of the given item.
+
+        Note that the *items* are returned, not the _WeightedDirectedVertex objects themselves.
+
+        Raise a ValueError if item does not appear as a vertex in this graph.
+        """
+        if item in self._vertices:
+            in_neighbors = set()
+            v = self._vertices[item]
+            for u in self._vertices.values():
+                if v in u.neighbours:
+                    in_neighbors.add(u.item)
+            return in_neighbors
+        else:
+            raise ValueError
+
+
