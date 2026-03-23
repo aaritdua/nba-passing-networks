@@ -25,7 +25,7 @@ class _WeightedDirectedVertex:
         self.neighbours = {}
 
 
-class WeightedDirectedGraphs:
+class WeightedDirectedGraph:
     """A graph used to represent a passing network.
     """
     # Private Instance Attributes:
@@ -47,7 +47,7 @@ class WeightedDirectedGraphs:
         if item not in self._vertices:
             self._vertices[item] = _WeightedDirectedVertex(item)
 
-    def add_directed_edge(self, item1: Any, item2: Any, weight: int = 1) -> None:
+    def add_directed_edge(self, item1: Any, item2: Any, weight: float = 1.0) -> None:
         """Add a directed edge from the vertex given by item1 to the vertex given by item2 in this graph,
         with the given weight.
 
@@ -95,5 +95,18 @@ class WeightedDirectedGraphs:
             return in_neighbors
         else:
             raise ValueError
-
-
+        
+    def bfs(self, start: Any) -> dict[Any, int]:
+        """Return a dictionary mapping each reachable vertex to its distance from start, measured in number of edges."""
+        visited = {}
+        queue = [start]
+        visited[start] = 0
+        while queue:
+            v = queue.pop(0)
+            vertex = self._vertices[v]
+            for vert in vertex.neighbours:
+                if vert.item not in visited:
+                    visited[vert.item] = visited[v] + 1
+                    queue.append(vert.item)
+        return visited
+    
