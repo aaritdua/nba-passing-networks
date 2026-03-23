@@ -97,7 +97,17 @@ class WeightedDirectedGraph:
             raise ValueError
         
     def bfs(self, start: Any) -> dict[Any, int]:
-        """Return a dictionary mapping each reachable vertex to its distance from start, measured in number of edges."""
+        """
+        Return a dictionary mapping each reachable vertex to its distance from start,
+        measured in number of directed edges.
+        
+        The start vertex itself is included with distance 0. Only vertices reachable
+        by following directed edges from start are included.
+        
+        Raise a ValueError if start does not appear as a vertex in this graph.
+        """
+        if start not in self._vertices:
+            raise ValueError
         visited = {}
         queue = [start]
         visited[start] = 0
@@ -110,3 +120,25 @@ class WeightedDirectedGraph:
                     queue.append(vert.item)
         return visited
     
+    def dfs(self, start: Any) -> list:
+        """
+        Return a list of items visited in depth-first order starting from start.
+        
+        Follows directed edges as deep as possible before backtracking. Each item
+        appears at most once in the returned list. The start vertex is included first.
+        
+        Raise a ValueError if start does not appear as a vertex in this graph.
+        """
+        if start not in self._vertices:
+            raise ValueError
+        visited = {}
+        stack = [start]
+        visited[start] = 0
+        while stack:
+            v = stack.pop()
+            vertex = self._vertices[v]
+            for vert in vertex.neighbours:
+                if vert.item not in visited:
+                    visited[vert.item] = visited[v] + 1
+                    stack.append(vert.item)
+        return list(visited.keys())
