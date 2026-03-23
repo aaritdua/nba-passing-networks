@@ -17,3 +17,23 @@ def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
 
 def get_hub_players(scores: dict, n: int) -> list:
     return sorted(scores, key=lambda x: scores[x], reverse=True)[:n]
+
+def cluster_filtering(graph: WeightedDirectedGraph, threshold: float) -> WeightedDirectedGraph:
+    edges = graph.get_edges()
+    g = WeightedDirectedGraph()
+    for player in graph._vertices:
+        g.add_vertex(player)
+    for edge in edges:
+        if edge[2] > threshold:
+            g.add_directed_edge(edge[0], edge[1], edge[2])
+    return g
+
+def find_clusters(graph: WeightedDirectedGraph) -> list[set]:
+    clusters = []
+    visited = set()
+    for player in graph._vertices:
+        if player not in visited:
+            cluster = set(graph.bfs(player).keys())
+            clusters.append(cluster)
+            visited.update(cluster)
+    return clusters

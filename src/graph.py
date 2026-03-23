@@ -142,3 +142,15 @@ class WeightedDirectedGraph:
                     visited[vert.item] = visited[v] + 1
                     stack.append(vert.item)
         return list(visited.keys())
+    
+    def get_edges(self) -> list[tuple]:
+        """
+        Return a list of all directed edges in this graph as (item1, item2, weight) tuples, 
+        where item1 -> item2 with the given weight.
+        """
+        edges = []
+        for item in self._vertices:
+            vertex = self._vertices[item]
+            for vert in vertex.neighbours:
+                edges.append((vertex.item, vert.item, vertex.neighbours[vert]))
+        return edges
