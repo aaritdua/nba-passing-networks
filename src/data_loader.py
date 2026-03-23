@@ -19,6 +19,7 @@ def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
             all_data.append(df)
             time.sleep(0.6)
         result = pd.concat(all_data, ignore_index = True)
+        result['weight'] = result['PASS'] + result['AST']
         result.to_csv(f"../data/passing_{team_id}_{season}.csv")
     return result
 
