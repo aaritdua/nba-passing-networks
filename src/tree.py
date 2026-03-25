@@ -13,9 +13,9 @@ class Tree:
     """
     # Private Instance Attributes:
     #   - _root:
-    #       The name of the NBA player represented by this Tree.
+    #       The name of the NBA player represented by this Tree, or "Shot"/"Turnover" in the event of a leaf node.
     #   - _subtrees:
-    #       The list of subtrees of this tree. Each subtree represents a player, turnover or shot attempt.
+    #       The list of subtrees of this tree. Each subtree represents either a player, turnover or shot attempt.
     _root: str 
     _subtrees: Optional[list[Tree]]
 
@@ -30,10 +30,18 @@ class Tree:
         """
         self._root = root
         self._subtrees = subtrees
-    
-    def add_node(self, node: Tree) -> None:
+
+    def add_node(self, player: str) -> None:
         """Add a player, turnover or shot attempt as a node."""
-        self._subtrees.append(node)
+        self._subtrees.append(Tree(player, []))
+
+    def add_shot(self) -> None:
+        """Add a shot attempt as a leaf node."""
+        self._subtrees.append(Tree("Shot", []))
+
+    def add_turnover(self) -> None:
+        """Add a turnover as a leaf node."""
+        self._subtrees.append(Tree("Turnover", []))
 
     def find(self, target: str) -> Tree | None:
         """Return the subtree whose root is target, else None."""
