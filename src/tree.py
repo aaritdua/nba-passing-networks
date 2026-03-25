@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any
+from typing import Any, Optional
 
 class Tree:
     """A recursive tree data structure representing a passing network for a single nba game. 
@@ -17,7 +17,7 @@ class Tree:
     #   - _subtrees:
     #       The list of subtrees of this tree. Each subtree represents a player, turnover or shot attempt.
     _root: str 
-    _subtrees: list[Tree]
+    _subtrees: Optional[list[Tree]]
 
 
     def __init__(self, root: Any, subtrees: list[Tree]) -> None:
@@ -47,6 +47,30 @@ class Tree:
 
         return None
     
+    def print_path(self, path: list[str]) -> bool:
+        """Print the given pass sequence if it exists."""
+        if self._path_exists(path):
+            print(" -> ".join(path))
+            return True
+        else:
+            print("Path not found.")
+            return False
+
+
+    def _path_exists(self, path: list[str]) -> bool:
+        """Return whether the path exists in the tree."""
+        if not path or self._root != path[0]:
+            return False
+
+        if len(path) == 1:
+            return True
+
+        for child in self._subtrees:
+            if child._root == path[1]:
+                return child._path_exists(path[1:])
+
+        return False
+        
     def add_path(self, path: list[str]) -> None:
         """Add a pass sequence to the tree.
 
@@ -55,7 +79,8 @@ class Tree:
         """
         current = self
 
-        for player in path[1:]:
+        for i in range(1, len(path)):
+            player = path[i]
             # Check if child already exists
             found = None
             for node in current._subtrees:
@@ -64,7 +89,7 @@ class Tree:
                     break
 
             if found is None:
-                new_node = Tree(player)
+                new_node = Tree(player, [])
                 current._subtrees.append(new_node)
                 current = new_node
             else:
@@ -72,7 +97,7 @@ class Tree:
 
     def max_depth(self) -> int:
         """Return the maximum depth of the tree."""
-        if not self.children:
+        if not self._subtrees:
             return 1
 
         return 1 + max(child.max_depth() for child in self._subtrees)
@@ -117,11 +142,18 @@ class Tree:
     
 
 # Root player starts possession
-tree = Tree("LeBron")
+tree = Tree("LeBron", [])
 
 tree.add_path(["LeBron", "AD", "Reaves", "Shot"])
 tree.add_path(["LeBron", "DLo", "AD", "Shot"])
-tree.add_path(["LeBron", "AD", "Turnover"])
+
+tree.print_path(["LeBron", "AD", "Reaves", "Shot"])
+# Output:
+# LeBron -> AD -> Reaves -> Shot
+
+tree.print_path(["LeBron", "AD", "Turnover"])
+# Output:
+# Path not found.
 
 print(tree.max_depth())  # e.g. 4
 print(tree.average_depth())
