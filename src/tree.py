@@ -142,20 +142,19 @@ class Tree:
     
 
 # Root player starts possession
-tree = Tree("LeBron", [])
+lebron = Tree("LeBron", [])
 
-tree.add_path(["LeBron", "AD", "Reaves", "Shot"])
-tree.add_path(["LeBron", "DLo", "AD", "Shot"])
+lebron.add_path(["LeBron", "AD", "Reaves", "Shot"])
+lebron.add_path(["LeBron", "DLo", "AD", "Shot"])
 
-tree.print_path(["LeBron", "AD", "Reaves", "Shot"])
+lebron.print_path(["LeBron", "AD", "Reaves", "Shot"])
 # Output:
 # LeBron -> AD -> Reaves -> Shot
 
-tree.print_path(["LeBron", "AD", "Turnover"])
+lebron.print_path(["LeBron", "AD", "Turnover"])
 # Output:
 # Path not found.
 
-print(tree.max_depth())  # e.g. 4
-print(tree.average_depth())
-print(tree.average_branching_factor())
-    
+print(lebron.max_depth())  # e.g. 4
+print(lebron.average_depth())
+print(lebron.average_branching_factor())
