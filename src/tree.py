@@ -17,7 +17,7 @@ class Tree:
     #   - _subtrees:
     #       The list of subtrees of this tree. Each subtree represents either a player, turnover or shot attempt.
     _root: str 
-    _subtrees: Optional[list[Tree]]
+    _subtrees: list[Tree]
 
 
     def __init__(self, root: Any, subtrees: list[Tree]) -> None:
@@ -31,7 +31,7 @@ class Tree:
         self._root = root
         self._subtrees = subtrees
 
-    def add_node(self, player: str) -> None:
+    def add_player(self, player: str) -> None:
         """Add a player, turnover or shot attempt as a node."""
         self._subtrees.append(Tree(player, []))
 
@@ -43,42 +43,42 @@ class Tree:
         """Add a turnover as a leaf node."""
         self._subtrees.append(Tree("Turnover", []))
 
-    def find(self, target: str) -> Tree | None:
-        """Return the subtree whose root is target, else None."""
+    def find_all(self, target: str) -> list[Tree]:
+        """Return ALL subtrees whose root is target."""
+        matches = []
+
         if self._root == target:
-            return self
-
-        for node in self._subtrees:
-            result = node.find(target)
-            if result is not None:
-                return result
-
-        return None
-    
-    def print_path(self, path: list[str]) -> bool:
-        """Print the given pass sequence if it exists."""
-        if self._path_exists(path):
-            print(" -> ".join(path))
-            return True
-        else:
-            print("Path not found.")
-            return False
-
-
-    def _path_exists(self, path: list[str]) -> bool:
-        """Return whether the path exists in the tree."""
-        if not path or self._root != path[0]:
-            return False
-
-        if len(path) == 1:
-            return True
+            matches.append(self)
 
         for child in self._subtrees:
-            if child._root == path[1]:
-                return child._path_exists(path[1:])
+            matches.extend(child.find_all(target))
 
-        return False
-        
+        return matches
+
+    def _get_all_paths(self) -> list[list[str]]:
+        """Return all paths from this node to leaves."""
+        if not self._subtrees:
+            return [[self._root]]
+
+        paths = []
+        for child in self._subtrees:
+            for subpath in child._get_all_paths():
+                paths.append([self._root] + subpath)
+        return paths
+    
+    def print_sequences_from(self, player: str) -> None:
+        """Print ALL pass sequences starting from every occurrence of player."""
+        nodes = self.find_all(player)
+
+        if not nodes:
+            print(f"Player '{player}' not found in tree.")
+            return
+
+        for node in nodes:
+            paths = node._get_all_paths()
+            for path in paths:
+                print(" -> ".join(path))
+
     def add_path(self, path: list[str]) -> None:
         """Add a pass sequence to the tree.
 
@@ -144,7 +144,11 @@ class Tree:
         nodes = [self._root]
 
         for child in self._subtrees:
-            nodes.extend(child.dfs())
+            if child._root in ["Shot", "Turnover"]:
+                nodes += child.dfs()
+                nodes += ["END OF POSSESSION"]
+            else:
+                nodes += child.dfs()
 
         return nodes
     
@@ -152,17 +156,27 @@ class Tree:
 # Root player starts possession
 lebron = Tree("LeBron", [])
 
-lebron.add_path(["LeBron", "AD", "Reaves", "Shot"])
-lebron.add_path(["LeBron", "DLo", "AD", "Shot"])
+lebron.add_path(["LeBron", "AD", "KD", "Shot"])
+lebron.add_path(["LeBron", "DLo", "AD", "Harden", "Westbrook"])
 
-lebron.print_path(["LeBron", "AD", "Reaves", "Shot"])
+#lebron.print_path(["LeBron", "AD", "Reaves", "Shot"])
 # Output:
 # LeBron -> AD -> Reaves -> Shot
 
-lebron.print_path(["LeBron", "AD", "Turnover"])
+#lebron.print_path(["LeBron", "AD", "Turnover"])
 # Output:
 # Path not found.
 
 print(lebron.max_depth())  # e.g. 4
 print(lebron.average_depth())
 print(lebron.average_branching_factor())
+print(lebron.dfs())
+print(lebron._leaf_depths(1))
+
+
+
+lebron.add_path(["LeBron", "AD", "Reaves", "Shot"])
+lebron.add_path(["LeBron", "AD", "Turnover"])
+lebron.add_path(["LeBron", "DLo", "AD", "Shot"])
+
+lebron.print_sequences_from("AD")
