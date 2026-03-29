@@ -14,7 +14,7 @@ class _WeightedDirectedVertex:
         - self not in self.neighbours
     """
     item: Any
-    neighbours: dict[_WeightedDirectedVertex, int]
+    neighbours: dict[_WeightedDirectedVertex, float]
 
     def __init__(self, item: Any) -> None:
         """Initialize a new vertex with the given item
