@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any
+import csv
 
 
 class _WeightedDirectedVertex:
@@ -95,15 +96,31 @@ class WeightedDirectedGraph:
             return in_neighbors
         else:
             raise ValueError
-        
+
+    def get_weight(self, item1: Any, item2: Any) -> float:
+        """Return the weight of the directed edge from item1 to item2.
+
+        Return 0 if item1 don't have a directed edge to item2
+
+        Preconditions:
+            - item1 and item2 are vertices in this graph
+        """
+        v1 = self._vertices[item1]
+        v2 = self._vertices[item2]
+        return v1.neighbours.get(v2, 0.0)
+
+    def get_all_vertices(self) -> set:
+        """Return a set of all vertex items in this graph. """
+        return set(self._vertices.keys())
+
     def bfs(self, start: Any) -> dict[Any, int]:
         """
         Return a dictionary mapping each reachable vertex to its distance from start,
         measured in number of directed edges.
-        
+
         The start vertex itself is included with distance 0. Only vertices reachable
         by following directed edges from start are included.
-        
+
         Raise a ValueError if start does not appear as a vertex in this graph.
         """
         if start not in self._vertices:
@@ -119,14 +136,14 @@ class WeightedDirectedGraph:
                     visited[vert.item] = visited[v] + 1
                     queue.append(vert.item)
         return visited
-    
+
     def dfs(self, start: Any) -> list:
         """
         Return a list of items visited in depth-first order starting from start.
-        
+
         Follows directed edges as deep as possible before backtracking. Each item
         appears at most once in the returned list. The start vertex is included first.
-        
+
         Raise a ValueError if start does not appear as a vertex in this graph.
         """
         if start not in self._vertices:
@@ -142,10 +159,10 @@ class WeightedDirectedGraph:
                     visited[vert.item] = visited[v] + 1
                     stack.append(vert.item)
         return list(visited.keys())
-    
+
     def get_edges(self) -> list[tuple]:
         """
-        Return a list of all directed edges in this graph as (item1, item2, weight) tuples, 
+        Return a list of all directed edges in this graph as (item1, item2, weight) tuples,
         where item1 -> item2 with the given weight.
         """
         edges = []
@@ -154,3 +171,48 @@ class WeightedDirectedGraph:
             for vert in vertex.neighbours:
                 edges.append((vertex.item, vert.item, vertex.neighbours[vert]))
         return edges
+
+
+def build_passing_graph(passing_data: str) -> WeightedDirectedGraph:
+    """Return a passing WEIGHTED DIRECTED graph corresponding to the given datasets.
+
+    >>> g = build_passing_graph('../data/passing_1610612738_2019-20.csv')
+    >>> len(g.get_all_vertices())
+    17
+    >>> len(g.get_out_neighbors('1628369'))
+    15
+    >>> len(g.get_in_neighbors('1628369'))
+    15
+    >>> g.get_weight('1628369', '1629682')
+    25.0
+    >>> g.get_weight('1628369', '1629605')
+    0.0
+    """
+    passing_graph = WeightedDirectedGraph()
+
+    with open(passing_data) as data:
+        reader = csv.reader(data)
+        next(reader)  # Skip the first row
+
+        for row in reader:
+            weight = float(row[22])
+            passing_graph.add_vertex(row[1])  # add player id player passing
+            passing_graph.add_vertex(row[9])  # add player id passed to this player
+            passing_graph.add_directed_edge(row[1], row[9], weight)
+
+    return passing_graph
+
+
+if __name__ == '__main__':
+    import doctest
+    # doctest.testmod()
+
+    # import python_ta
+    #
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['static_type_checker'],
+    #     'extra-imports': ['csv', 'networkx'],
+    #     'allowed-io': ['load_review_graph'],
+    #     'max-nested-blocks': 4
+    # })
