@@ -90,3 +90,17 @@ def average_path_length(graph: WeightedDirectedGraph) -> float:
                 count += 1
     return total / count if count > 0 else 0.0
 
+def _average_branching_factor_all_tree(trees: list[Tree]) -> float:
+    """Return the mean of average branching factor across all pass-sequence trees .
+
+        This is computed by taking each tree's average branching factor and then
+        returning the mean of those values.
+    """
+    if not trees:
+        return 0.0
+    else:
+        avg_branching_factor = 0
+        for tree in trees:
+            avg_branching_factor += tree.average_branching_factor()
+        return avg_branching_factor / len(trees)
+
