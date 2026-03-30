@@ -1,5 +1,8 @@
+dash==4.1.0
 nba_api==1.11.4
-plotly==6.6.0
 networkx==3.6.1
+numpy==2.4.2
 pandas==3.0.1
-dash
+plotly==6.6.0
+python-ta==2.12.1
+requests==2.32.5

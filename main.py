@@ -15,6 +15,8 @@ explicit written permission from the author.
 This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
 Users are responsible for reviewing and complying with those licenses.
 """
+
 from visualization import run_visualization
 
-run_visualization()
+if __name__ == '__main__':
+    run_visualization()

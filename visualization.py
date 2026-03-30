@@ -282,8 +282,6 @@ def run_visualization() -> None:
 if __name__ == '__main__':
     import doctest
 
-    run_visualization()
-
     import python_ta
     
     python_ta.check_all(config={
@@ -293,3 +291,5 @@ if __name__ == '__main__':
         'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
         'max-nested-blocks': 4
     })
+
+    run_visualization()
