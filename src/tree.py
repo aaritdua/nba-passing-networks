@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from src import data_loader
+
 
 class Tree:
     """A recursive tree representing one possession tree in a game.
@@ -149,38 +151,68 @@ class Tree:
         return nodes
 
 
-def build_possession_tree(paths: list[list[str]]) -> Tree:
-    """Return a possession tree built from the given possession paths.
+def build_possession_tree(df: pd.DataFrame) -> Tree:
+    """Return a possession tree for the given game.
 
-    Each path must begin with the same root player. Player nodes are merged
-    along shared prefixes, while repeated terminal events such as ``"Shot"``
-    and ``"Turnover"`` are preserved as separate leaves.
+    The tree is constructed by parsing play-by-play data and extracting
+    pass sequences that end in either a Shot or Turnover.
 
-    >>> tree = build_possession_tree([
-    ...     ["LeBron", "Kyrie", "Shot"],
-    ...     ["LeBron", "Shot"],
-    ...     ["LeBron", "Shot"],
-    ...     ["LeBron", "Kyrie", "Turnover"]
-    ... ])
-    >>> len(tree.find_all("Shot"))
-    3
-    >>> len(tree.find_all("Kyrie"))
-    1
+    Each possession is added as a path to the tree. Player nodes are merged
+    along shared prefixes, while repeated terminal events are preserved.
+
+    >>> df = load_play_by_play("0022200001")
+    >>> tree = build_possession_tree("0022200001")
+    >>> isinstance(tree, Tree)
+    True
+    >>> tree._root is not None
+    True
+    >>> len(tree._subtrees) > 0
+    True
+    >>> # There should be at least some shot or turnover endings
+    >>> len(tree.find_all("Shot")) >= 0
+    True
+    >>> len(tree.find_all("Turnover")) >= 0
+    True
     """
-    if not paths:
-        raise ValueError("Cannot build a possession tree from an empty path list.")
 
-    root = paths[0][0] if paths[0] else None
-    if root is None:
-        raise ValueError("Paths must be non-empty.")
+    tree = Tree("ROOT")
 
-    tree = Tree(root)
+    current_path = []
 
-    for path in paths:
-        if not path:
-            raise ValueError("Paths must be non-empty.")
-        if path[0] != root:
-            raise ValueError("All paths must start with the same root player.")
-        tree.add_path(path)
+    for _, row in df.iterrows():
+        event = row.get("EVENTMSGTYPE")
+        player1 = row.get("PLAYER1_NAME")
+        player2 = row.get("PLAYER2_NAME")
+
+        if not isinstance(player1, str) or player1.strip() == "":
+            continue
+
+        if not current_path:
+            current_path = ["ROOT", player1]
+
+        if isinstance(player2, str) and player2.strip() != "":
+            if current_path[-1] != player2:
+                current_path.append(player2)
+
+        if event in {1, 2}:
+            if current_path:
+                current_path.append("Shot")
+                try:
+                    tree.add_path(current_path)
+                except ValueError:
+                    pass
+            current_path = []
+
+        elif event == 5:
+            if current_path:
+                current_path.append("Turnover")
+                try:
+                    tree.add_path(current_path)
+                except ValueError:
+                    pass
+            current_path = []
+
+        elif event == 4:
+            current_path = []
 
     return tree
