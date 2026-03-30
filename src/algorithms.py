@@ -90,17 +90,34 @@ def average_path_length(graph: WeightedDirectedGraph) -> float:
                 count += 1
     return total / count if count > 0 else 0.0
 
-def _average_branching_factor_all_tree(trees: list[Tree]) -> float:
+def aggregate_possession_stats(trees: list[Tree]) -> tuple[int, float]:
+    """Return the average pass depth and average branching factor across all pass-sequence trees"""
+    if not trees:
+        return 0, 0.0
+    else:
+        return _average_pass_depth_all_tree(trees), average_branching_factor_all_tree(trees)
+
+
+def average_branching_factor_all_tree(trees: list[Tree]) -> float:
     """Return the mean of average branching factor across all pass-sequence trees .
 
         This is computed by taking each tree's average branching factor and then
         returning the mean of those values.
     """
-    if not trees:
-        return 0.0
-    else:
-        avg_branching_factor = 0
-        for tree in trees:
-            avg_branching_factor += tree.average_branching_factor()
-        return avg_branching_factor / len(trees)
+    avg_branching_factor = 0
+    for tree in trees:
+        avg_branching_factor += tree.average_branching_factor()
+    return avg_branching_factor / len(trees)
+
+
+def _average_pass_depth_all_tree(trees: list[Tree]) -> int:
+    """Return the mean of average pass depth acroos all pass-sequence trees .
+
+        This is computed by taking each tree's average pass depth and then returning the mean of those values
+    """
+    avg_pass_depth = 0
+    for tree in trees:
+        avg_pass_depth += tree.average_depth()
+    return int(avg_pass_depth / len(trees))
+
 
