@@ -1,6 +1,25 @@
+"""CSC111 Winter 2026 Project 2: Mapping the Flow
+
+Created by: Aarit Dua, Vedant Kansara, Lucas Hui
+
+Title: tree
+Description: This file contains the implementation of a possession tree used to
+represent and analyze pass sequences from NBA play-by-play data, along with
+functions for building possession trees from game data.
+
+Copyright and Usage Information
+===============================
+
+This file is provided for educational and personal use only. You may view, download, and modify the code for your own
+non-commercial purposes, provided that proper credit is given to the original author.
+You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
+explicit written permission from the author.
+This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
+Users are responsible for reviewing and complying with those licenses.
+"""
 from __future__ import annotations
+import random
 import pandas as pd
-from data_loader import load_play_by_play
 
 
 class PossessionTree:
@@ -150,6 +169,7 @@ class PossessionTree:
 
         return nodes
 
+
 def build_random_possession_sequences(df: pd.DataFrame) -> list[list[str]]:
     """Extract possessions and generate approximate pass sequences from play-by-play data.
 
@@ -157,7 +177,6 @@ def build_random_possession_sequences(df: pd.DataFrame) -> list[list[str]]:
     possession are approximated by shuffling the players involved. This allows
     tree construction and computation as a proof of concept.
     """
-    import random
     df = df.sort_values(by=["period", "clock"])
     possessions = []
     current_team = None
@@ -199,13 +218,13 @@ def build_random_possession_sequences(df: pd.DataFrame) -> list[list[str]]:
 def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
     """Return a possession tree built from play-by-play data.
 
-    >>> df = load_play_by_play("0022300061")
-    >>> tree = build_possession_tree(df)
-    >>> isinstance(tree, PossessionTree)
+    >>> df1 = load_play_by_play("0022300061")
+    >>> tree1 = build_possession_tree(df1)
+    >>> isinstance(tree1, PossessionTree)
     True
-    >>> tree._root is not None
+    >>> tree1._root is not None
     True
-    >>> len(tree._subtrees) > 0
+    >>> len(tree1._subtrees) > 0
     True
     """
     sequences = build_random_possession_sequences(df)
@@ -219,3 +238,14 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
             pass
 
     return tree
+
+
+if __name__ == '__main__':
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['static_type_checker'],
+        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'graph', 'tree', 'data_loader'],
+        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
+        'max-nested-blocks': 4
+    })

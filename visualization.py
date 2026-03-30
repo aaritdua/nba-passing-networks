@@ -1,24 +1,49 @@
+"""CSC111 Winter 2026 Project 2: Mapping the Flow
+
+Created by: Aarit Dua, Vedant Kansara, Lucas Hui
+
+Title: visualization
+Description: This file contains functions and a Dash app for visualizing NBA
+passing networks and related possession statistics.
+
+Copyright and Usage Information
+===============================
+
+This file is provided for educational and personal use only. You may view, download, and modify the code for your own
+non-commercial purposes, provided that proper credit is given to the original author.
+You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
+explicit written permission from the author.
+This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
+Users are responsible for reviewing and complying with those licenses.
+"""
+import time
+import traceback
 import dash
 from dash import dcc, html, Input, Output
 from nba_api.stats.static import teams, players
 import networkx as nx
 import plotly.graph_objects as go
+import pandas as pd
 from graph import WeightedDirectedGraph, build_passing_graph
 from tree import PossessionTree, build_possession_tree
-from algorithms import weighted_centrality, average_path_length, aggregate_possession_stats, get_hub_players, cluster_filtering, find_clusters
-import pandas as pd
+from algorithms import weighted_centrality, average_path_length, aggregate_possession_stats, get_hub_players, \
+    cluster_filtering, find_clusters
 from data_loader import load_passing_data, load_game_ids, load_play_by_play
-import time
 
-def get_player_name(player_id) -> str:
-    """Return the full name for a given player ID, or the ID as string if not found."""
+
+def get_player_name(player_id: str) -> str:
+    """Return the full name of the player with the given player ID.
+
+        If no matching player is found, return the given player ID as a string.
+    """
     player = players.find_player_by_id(int(player_id))
     return player['full_name'] if player else str(player_id)
 
+
 def get_node_positions(graph: WeightedDirectedGraph) -> dict:
     """
-    Return a dictionary mapping each player ID to an (x, y) position. 
-    
+    Return a dictionary mapping each player ID to an (x, y) position.
+
     >>> g = WeightedDirectedGraph()
     >>> g.add_vertex(1)
     >>> g.add_vertex(2)
@@ -29,11 +54,17 @@ def get_node_positions(graph: WeightedDirectedGraph) -> dict:
     >>> len(positions[1]) == 2
     True
     """
-    
     nx_graph = graph.to_networkx()
     return nx.spring_layout(nx_graph, k=10, seed=42)
 
+
 def build_edge_traces(graph: WeightedDirectedGraph, positions: dict, widths: dict) -> list:
+    """Return a list of Plotly traces representing the directed edges in graph.
+
+       Each edge is drawn as a line between the positions of its two endpoint nodes.
+       The displayed line width is based on the corresponding edge weight stored in
+       widths.
+    """
     graph_nx = graph.to_networkx()
     traces = []
     for u, v in graph_nx.edges():
@@ -50,7 +81,13 @@ def build_edge_traces(graph: WeightedDirectedGraph, positions: dict, widths: dic
         traces.append(trace)
     return traces
 
+
 def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dict, player_cluster, colors) -> list:
+    """Return a list of Plotly traces representing the nodes in graph.
+
+    Each node is displayed with its player name, centrality-based size, and
+    cluster-based color.
+    """
     graph_nx = graph.to_networkx()
     traces = []
     for node in graph_nx.nodes():
@@ -71,20 +108,31 @@ def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dic
         traces.append(trace)
     return traces
 
+
 def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: pd.DataFrame) -> go.Figure:
+    """Return a Plotly figure visualizing the passing network for graph.
+
+    The figure includes:
+        - directed edges with toggleable weighted and raw pass-count views
+        - player nodes sized by centrality score
+        - cluster-based node coloring
+        - annotations for average path length, average pass depth,
+          average branching factor, and hub players
+    """
     positions = get_node_positions(graph)
     scores = weighted_centrality(graph)
     weighted_widths = {(row['PLAYER_ID'], row['PASS_TEAMMATE_PLAYER_ID']): row['weight'] for _, row in df.iterrows()}
     raw_widths = {(row['PLAYER_ID'], row['PASS_TEAMMATE_PLAYER_ID']): row['PASS'] for _, row in df.iterrows()}
     edge_traces_weighted = build_edge_traces(graph, positions, weighted_widths)
-    edge_traces_raw = build_edge_traces(graph, positions, raw_widths,)
+    edge_traces_raw = build_edge_traces(graph, positions, raw_widths, )
     filtered_graph = cluster_filtering(graph, threshold=200)
     clusters = find_clusters(filtered_graph)
     player_cluster = {}
     for i, cluster in enumerate(clusters):
         for player in cluster:
             player_cluster[player] = i
-    colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00','#a65628', '#f781bf', '#999999', '#ffff33', '#a6cee3']
+    colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00', '#a65628', '#f781bf', '#999999', '#ffff33',
+              '#a6cee3']
     node_traces = build_node_traces(graph, positions, scores, player_cluster, colors)
     avg_path_length = average_path_length(graph)
     avg_pass_depth, avg_branching = aggregate_possession_stats(trees)
@@ -94,7 +142,7 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
         trace['visible'] = False
 
     figure = go.Figure(data=edge_traces_weighted + edge_traces_raw + node_traces)
-    
+
     figure.update_layout(
         showlegend=False,
         xaxis=dict(showgrid=False, zeroline=False, visible=False),
@@ -114,12 +162,14 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
             type="buttons",
             buttons=[
                 dict(label="Quality-Adjusted", method="update",
-                    args=[{"visible": [True] * len(edge_traces_weighted) + [False] * len(edge_traces_raw) + [True] * len(node_traces)}]),
+                     args=[{"visible": [True] * len(edge_traces_weighted) + [False] * len(edge_traces_raw) + [
+                         True] * len(node_traces)}]),
                 dict(label="Raw Pass Count", method="update",
-                    args=[{"visible": [False] * len(edge_traces_weighted) + [True] * len(edge_traces_raw) + [True] * len(node_traces)}])
+                     args=[{"visible": [False] * len(edge_traces_weighted) + [True] * len(edge_traces_raw) + [
+                         True] * len(node_traces)}])
             ]
         )],
-        
+
         annotations=[
             dict(
                 x=1.02,  # just outside the right edge of the graph
@@ -166,6 +216,7 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
 
     return figure
 
+
 app = dash.Dash(__name__)
 
 all_teams = teams.get_teams()
@@ -178,20 +229,33 @@ season_options = [
 
 app.layout = html.Div([
     html.Div([
-        dcc.Dropdown(id='team-dropdown', options=team_options, value=1610612747, 
-                    searchable=False, style={'width': '350px'}),
+        dcc.Dropdown(id='team-dropdown', options=team_options, value=1610612747,
+                     searchable=False, style={'width': '350px'}),
         dcc.Dropdown(id='season-dropdown', options=season_options, value='2023-24',
-                    style={'width': '150px', 'marginLeft': '10px'}),
+                     style={'width': '150px', 'marginLeft': '10px'}),
     ], style={'display': 'flex', 'marginTop': '10px', 'marginLeft': '10px', 'marginBottom': '10px'}),
     dcc.Graph(id='passing-graph', style={'height': '85vh'})
 ])
+
 
 @app.callback(
     Output('passing-graph', 'figure'),
     Input('team-dropdown', 'value'),
     Input('season-dropdown', 'value')
 )
-def update_graph(team_id, season):
+def update_graph(team_id, season) -> go.Figure:
+    """Return an updated passing-network figure for the selected team and season.
+
+        This callback loads passing data, builds the passing graph, constructs a small
+        collection of possession trees from recent games, and returns the completed
+        visualization figure.
+
+        If team_id or season is missing, return an empty figure.
+
+        Preconditions:
+        - team_id is a valid NBA team ID or None
+        - season is a valid NBA season string in the format 'YYYY-YY' or None
+        """
     if team_id is None or season is None:
         return go.Figure()
     time.sleep(0.5)
@@ -206,15 +270,26 @@ def update_graph(team_id, season):
         return build_figure(graph, trees, df)
     except Exception as e:
         print(f"Error: {e}")
-        import traceback
         traceback.print_exc()
         raise
+
 
 def run_visualization() -> None:
     """Launch the interactive passing network visualization."""
     app.run(debug=True)
-    
-    
-    
+
+
 if __name__ == '__main__':
+    import doctest
+
     run_visualization()
+
+    import python_ta
+    
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['static_type_checker'],
+        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'traceback', 'dash', 'nba_api.stats.static', 'plotly.graph_objects'],
+        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
+        'max-nested-blocks': 4
+    })

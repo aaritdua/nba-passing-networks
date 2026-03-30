@@ -81,8 +81,7 @@ if __name__ == '__main__':
 
     python_ta.check_all(config={
         'max-line-length': 120,
-        'disable': ['static_type_checker'],
-        'extra-imports': ['csv', 'networkx'],
-        'allowed-io': ['load_review_graph'],
+        'extra-imports': ['time', 'pandas', 'os', 'nba_api', 'random'],
+        'allowed-io': ['load_passing_data', 'load_play_by_play', 'load_game_ids'],
         'max-nested-blocks': 4
     })
