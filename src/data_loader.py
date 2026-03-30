@@ -76,6 +76,7 @@ def load_game_ids(team_id: int, season: str) -> list[str]:
         return games['GAME_ID'].tolist()
     
 if __name__ == '__main__':
+    
     import python_ta
 
     python_ta.check_all(config={
