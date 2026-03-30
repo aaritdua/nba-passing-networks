@@ -20,6 +20,7 @@ Users are responsible for reviewing and complying with those licenses.
 from __future__ import annotations
 import random
 import pandas as pd
+from data_loader import load_play_by_play
 
 
 class PossessionTree:
