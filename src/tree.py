@@ -151,32 +151,3 @@ class Tree:
                 nodes += child.dfs()
 
         return nodes
-    
-
-# Root player starts possession
-lebron = Tree("LeBron", [])
-
-lebron.add_path(["LeBron", "AD", "KD", "Shot"])
-lebron.add_path(["LeBron", "DLo", "AD", "Harden", "Westbrook"])
-
-#lebron.print_path(["LeBron", "AD", "Reaves", "Shot"])
-# Output:
-# LeBron -> AD -> Reaves -> Shot
-
-#lebron.print_path(["LeBron", "AD", "Turnover"])
-# Output:
-# Path not found.
-
-print(lebron.max_depth())  # e.g. 4
-print(lebron.average_depth())
-print(lebron.average_branching_factor())
-print(lebron.dfs())
-print(lebron._leaf_depths(1))
-
-
-
-lebron.add_path(["LeBron", "AD", "Reaves", "Shot"])
-lebron.add_path(["LeBron", "AD", "Turnover"])
-lebron.add_path(["LeBron", "DLo", "AD", "Shot"])
-
-lebron.print_sequences_from("AD")
