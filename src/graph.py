@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any
 import csv
-
+import networkx as nx
 
 class _WeightedDirectedVertex:
     """A vertex in a weighted directed graph representing a player
@@ -172,6 +172,20 @@ class WeightedDirectedGraph:
                 edges.append((vertex.item, vert.item, vertex.neighbours[vert]))
         return edges
 
+    def to_networkx(self) -> nx.DiGraph:
+        """Convert this graph into a networkx DiGraph."""
+        di_graph_nx = nx.DiGraph()
+
+        di_graph_nx.add_nodes_from(v.item for v in self._vertices.values())
+
+        di_graph_nx.add_weighted_edges_from(
+            (v.item, u.item, weight)
+            for v in self._vertices.values()
+            for u, weight in v.neighbours.items()
+        )
+
+        return di_graph_nx
+        
 
 def build_passing_graph(passing_data: str) -> WeightedDirectedGraph:
     """Return a passing WEIGHTED DIRECTED graph corresponding to the given datasets.
