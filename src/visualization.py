@@ -31,7 +31,7 @@ def get_node_positions(graph: WeightedDirectedGraph) -> dict:
     """
     
     nx_graph = graph.to_networkx()
-    return nx.spring_layout(nx_graph)
+    return nx.spring_layout(nx_graph, k=10, seed=42)
 
 def build_edge_traces(graph: WeightedDirectedGraph, positions: dict, widths: dict) -> list:
     graph_nx = graph.to_networkx()
@@ -86,6 +86,19 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
     
     figure.update_layout(
         showlegend=False,
+        xaxis=dict(showgrid=False, zeroline=False, visible=False),
+        yaxis=dict(showgrid=False, zeroline=False, visible=False),
+        plot_bgcolor='white',
+        paper_bgcolor='white',
+        margin=dict(l=20, r=220, t=20, b=20),
+        shapes=[dict(
+            type='rect',
+            xref='paper',
+            yref='paper',
+            x0=0, y0=0,
+            x1=1, y1=1,
+            line=dict(color='black', width=2)
+        )],
         updatemenus=[dict(
             type="buttons",
             buttons=[
@@ -104,7 +117,8 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
                 yref="paper",
                 text=f"Avg Path Length: {avg_path_length:.2f}",
                 showarrow=False,
-                align="left"
+                align="left",
+                xanchor="left"
             ),
             dict(
                 x=1.02,
@@ -113,7 +127,8 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
                 yref="paper",
                 text=f"Avg Pass Depth: {avg_pass_depth:.2f}",
                 showarrow=False,
-                align="left"
+                align="left",
+                xanchor="left"
             ),
             dict(
                 x=1.02,
@@ -122,7 +137,8 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
                 yref="paper",
                 text=f"Avg Branching Factor: {avg_branching:.2f}",
                 showarrow=False,
-                align="left"
+                align="left",
+                xanchor="left"
             )
         ]
     )
@@ -142,7 +158,7 @@ season_options = [
 app.layout = html.Div([
     dcc.Dropdown(id='team-dropdown', options=team_options, value=1610612747),
     dcc.Dropdown(id='season-dropdown', options=season_options, value='2023-24'),
-    dcc.Graph(id='passing-graph')
+    dcc.Graph(id='passing-graph', style={'height': '80vh'})
 ])
 
 @app.callback(

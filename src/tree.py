@@ -160,7 +160,7 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
     Each possession is added as a path to the tree. Player nodes are merged
     along shared prefixes, while repeated terminal events are preserved.
 
-    >>> df = load_play_by_play("0022200001")
+    >>> df = load_play_by_play("0022300061")
     >>> tree = build_possession_tree(df)
     >>> isinstance(tree, PossessionTree)
     True
@@ -168,51 +168,43 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
     True
     >>> len(tree._subtrees) > 0
     True
-    >>> # There should be at least some shot or turnover endings
     >>> len(tree.find_all("Shot")) >= 0
     True
     >>> len(tree.find_all("Turnover")) >= 0
     True
     """
-
     tree = PossessionTree("ROOT")
-
     current_path = []
 
     for _, row in df.iterrows():
         event = row.get("actionType")
-        player1 = row.get("playerName")
-        player2 = row.get("personId")
+        player = row.get("playerName")
 
-        if not isinstance(player1, str) or player1.strip() == "":
+        if not isinstance(player, str) or player.strip() == "":
             continue
 
         if not current_path:
-            current_path = ["ROOT", player1]
+            current_path = ["ROOT", player]
+        elif current_path[-1] != player:
+            current_path.append(player)
 
-        if isinstance(player2, str) and player2.strip() != "":
-            if current_path[-1] != player2:
-                current_path.append(player2)
-
-        if event in {1, 2}:
-            if current_path:
-                current_path.append("Shot")
-                try:
-                    tree.add_path(current_path)
-                except ValueError:
-                    pass
+        if event in {"2pt", "3pt", "freethrow"}:
+            current_path.append("Shot")
+            try:
+                tree.add_path(current_path)
+            except ValueError:
+                pass
             current_path = []
 
-        elif event == 5:
-            if current_path:
-                current_path.append("Turnover")
-                try:
-                    tree.add_path(current_path)
-                except ValueError:
-                    pass
+        elif event == "turnover":
+            current_path.append("Turnover")
+            try:
+                tree.add_path(current_path)
+            except ValueError:
+                pass
             current_path = []
 
-        elif event == 4:
+        elif event in {"rebound", "jumpball"}:
             current_path = []
 
     return tree
