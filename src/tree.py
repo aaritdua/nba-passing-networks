@@ -161,7 +161,7 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
     along shared prefixes, while repeated terminal events are preserved.
 
     >>> df = load_play_by_play("0022200001")
-    >>> tree = build_possession_tree("0022200001")
+    >>> tree = build_possession_tree(df)
     >>> isinstance(tree, PossessionTree)
     True
     >>> tree._root is not None
@@ -180,9 +180,9 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
     current_path = []
 
     for _, row in df.iterrows():
-        event = row.get("EVENTMSGTYPE")
-        player1 = row.get("PLAYER1_NAME")
-        player2 = row.get("PLAYER2_NAME")
+        event = row.get("actionType")
+        player1 = row.get("playerName")
+        player2 = row.get("personId")
 
         if not isinstance(player1, str) or player1.strip() == "":
             continue

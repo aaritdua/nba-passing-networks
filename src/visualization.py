@@ -1,6 +1,6 @@
 import dash
 from dash import dcc, html, Input, Output
-from nba_api.stats.static import teams
+from nba_api.stats.static import teams, players
 import networkx as nx
 import plotly.graph_objects as go
 from graph import WeightedDirectedGraph, build_passing_graph
@@ -9,6 +9,11 @@ from algorithms import weighted_centrality, average_path_length, aggregate_posse
 import pandas as pd
 from data_loader import load_passing_data
 import time
+
+def get_player_name(player_id) -> str:
+    """Return the full name for a given player ID, or the ID as string if not found."""
+    player = players.find_player_by_id(int(player_id))
+    return player['full_name'] if player else str(player_id)
 
 def get_node_positions(graph: WeightedDirectedGraph) -> dict:
     """
@@ -55,10 +60,10 @@ def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dic
             x=[x],
             y=[y],
             mode='markers+text',
-            text=str(node),
+            text=get_player_name(node),
             textposition='top center',
             hoverinfo='text',
-            hovertext=f'Player: {node}<br>Centrality: {c:.3f}',
+            hovertext=f'Player: {get_player_name(node)}<br>Centrality: {c:.3f}',
             marker=dict(size=20 + 40 * c)
         )
         traces.append(trace)
