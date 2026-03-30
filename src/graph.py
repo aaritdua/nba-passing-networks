@@ -1,7 +1,8 @@
 from __future__ import annotations
 from typing import Any
-import csv
 import networkx as nx
+import pandas as pd
+import data_loader
 
 class _WeightedDirectedVertex:
     """A vertex in a weighted directed graph representing a player
@@ -187,10 +188,11 @@ class WeightedDirectedGraph:
         return di_graph_nx
         
 
-def build_passing_graph(passing_data: str) -> WeightedDirectedGraph:
+def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
     """Return a passing WEIGHTED DIRECTED graph corresponding to the given datasets.
-
-    >>> g = build_passing_graph('../data/passing_1610612738_2019-20.csv')
+    
+    >>> df = data_loader.load_passing_data(1610612738, '2019-20')
+    >>> g = build_passing_graph(df)
     >>> len(g.get_all_vertices())
     17
     >>> len(g.get_out_neighbors('1628369'))
@@ -204,17 +206,17 @@ def build_passing_graph(passing_data: str) -> WeightedDirectedGraph:
     """
     passing_graph = WeightedDirectedGraph()
 
-    with open(passing_data) as data:
-        reader = csv.reader(data)
-        next(reader)  # Skip the first row
+    for _, row in passing_data.iterrows():
+        weight = float(row['weight'])
+        passer = str(row['PLAYER_ID'])
+        receiver = str(row['PASS_TEAMMATE_PLAYER_ID'])
 
-        for row in reader:
-            weight = float(row[22])
-            passing_graph.add_vertex(row[1])  # add player id player passing
-            passing_graph.add_vertex(row[9])  # add player id passed to this player
-            passing_graph.add_directed_edge(row[1], row[9], weight)
+        passing_graph.add_vertex(passer)
+        passing_graph.add_vertex(receiver)
+        passing_graph.add_directed_edge(passer, receiver, weight)
 
     return passing_graph
+
 
 
 if __name__ == '__main__':
