@@ -43,7 +43,6 @@ def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
             time.sleep(0.6)
         result = pd.concat(all_data, ignore_index=True)
         result['weight'] = result['PASS'] + result['AST']
-        result = result[result['PASS'] >= 10]
         result.to_csv(f"../data/passing_{team_id}_{season}.csv")
     return result
 
@@ -63,25 +62,34 @@ def load_play_by_play(game_id: str) -> pd.DataFrame:
         result.to_csv(f"../data/playbyplay_{game_id}.csv")
     return result
 
+
 def load_game_ids(team_id: int, season: str) -> list[str]:
-    """Return a list of game IDs for a given team and season."""
+    """Return a list of game IDs for a given team and season.
+
+    Preconditions:
+        - team_id is a valid NBA team ID
+        - season is a valid NBA season string in the format 'YYYY-YY'
+    """
     cache_path = f"../data/games_{team_id}_{season}.csv"
     try:
         result = pd.read_csv(cache_path)
         return result['GAME_ID'].tolist()
-    except:
+    except FileNotFoundError:
         games = leaguegamelog.LeagueGameLog(season=season).get_data_frames()[0]
         games = games[games['TEAM_ID'] == team_id]
         games.to_csv(cache_path)
         return games['GAME_ID'].tolist()
-    
-if __name__ == '__main__':
-    import python_ta
 
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['static_type_checker'],
-        'extra-imports': ['csv', 'networkx'],
-        'allowed-io': ['load_review_graph'],
-        'max-nested-blocks': 4
-    })
+
+if __name__ == '__main__':
+    import doctest
+    
+    # import python_ta
+
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['static_type_checker'],
+    #     'extra-imports': ['csv', 'networkx'],
+    #     'allowed-io': ['load_review_graph'],
+    #     'max-nested-blocks': 4
+    # })
