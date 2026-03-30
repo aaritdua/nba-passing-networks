@@ -21,7 +21,6 @@ from __future__ import annotations
 from typing import Any
 import networkx as nx
 import pandas as pd
-from data_loader import load_passing_data
 
 
 class _WeightedDirectedVertex:
@@ -239,14 +238,13 @@ def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
 
 
 if __name__ == '__main__':
-    import doctest
 
-    # import python_ta
-    #
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['static_type_checker'],
-    #     'extra-imports': ['csv', 'networkx'],
-    #     'allowed-io': ['load_review_graph'],
-    #     'max-nested-blocks': 4
-    # })
+    import python_ta
+
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['static_type_checker'],
+        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'data_loader'],
+        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
+        'max-nested-blocks': 4
+    })

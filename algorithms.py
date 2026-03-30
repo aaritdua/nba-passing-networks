@@ -152,14 +152,11 @@ def _average_pass_depth_trees(trees: list[PossessionTree]) -> int:
 
 
 if __name__ == '__main__':
-    import doctest
-
-    # import python_ta
-    #
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['static_type_checker'],
-    #     'extra-imports': ['csv', 'networkx'],
-    #     'allowed-io': ['load_review_graph'],
-    #     'max-nested-blocks': 4
-    # })
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['static_type_checker'],
+        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'graph', 'tree'],
+        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
+        'max-nested-blocks': 4
+    })

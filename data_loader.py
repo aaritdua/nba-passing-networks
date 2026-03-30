@@ -17,15 +17,17 @@ This project may include third-party libraries, data, or tools that are subject 
 Users are responsible for reviewing and complying with those licenses.
 """
 import time
+import os
 from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster, PlayByPlayV3, leaguegamelog
 import pandas as pd
-import os
+
 
 def _get_data_path(filename: str) -> str:
     base_dir = os.path.dirname(os.path.abspath(__file__))
     data_dir = os.path.join(base_dir, "data")
     os.makedirs(data_dir, exist_ok=True)
     return os.path.join(data_dir, filename)
+
 
 def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
     """
@@ -97,14 +99,12 @@ def load_game_ids(team_id: int, season: str) -> list[str]:
 
 
 if __name__ == '__main__':
-    import doctest
-    
-    # import python_ta
+    import python_ta
 
-    # python_ta.check_all(config={
-    #     'max-line-length': 120,
-    #     'disable': ['static_type_checker'],
-    #     'extra-imports': ['csv', 'networkx'],
-    #     'allowed-io': ['load_review_graph'],
-    #     'max-nested-blocks': 4
-    # })
+    python_ta.check_all(config={
+        'max-line-length': 120,
+        'disable': ['static_type_checker'],
+        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'nba_api.stats.endpoints'],
+        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
+        'max-nested-blocks': 4
+    })
