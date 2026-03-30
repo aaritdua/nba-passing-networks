@@ -1,5 +1,25 @@
+"""CSC111 Winter 2026 Project 2: Mapping the Flow
+
+Created by: Aarit Dua, Vedant Kansara, Lucas Hui
+
+Title: algorithms
+Description: This file contains functions for analyzing passing networks and
+possession trees, including player centrality, hub detection, clustering,
+path length, and aggregate possession statistics.
+
+Copyright and Usage Information
+===============================
+
+This file is provided for educational and personal use only. You may view, download, and modify the code for your own
+non-commercial purposes, provided that proper credit is given to the original author.
+You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
+explicit written permission from the author.
+This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
+Users are responsible for reviewing and complying with those licenses.
+"""
 from graph import WeightedDirectedGraph
 from tree import PossessionTree
+
 
 def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
     """
@@ -10,13 +30,14 @@ def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
     score of 1.0. A higher score indicates a player who is more central to their
     team's offensive flow.
     """
-    
+
     scores = {}
-    for player in graph._vertices:
-        vertex = graph._vertices[player]
+    graph_vertices = graph.get_vertices()
+    for player in graph_vertices:
+        vertex = graph_vertices[player]
         out_score = sum(vertex.neighbours.values())
         in_score = 0
-        for other_vertex in graph._vertices.values():
+        for other_vertex in graph_vertices.values():
             if vertex in other_vertex.neighbours:
                 in_score += other_vertex.neighbours[vertex]
         scores[player] = out_score + in_score
@@ -25,6 +46,7 @@ def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
         scores[player] = scores[player] / max_score
     return scores
 
+
 def get_hub_players(scores: dict, n: int) -> list:
     """
     Return the top n players by centrality score as a list of player IDs.
@@ -32,8 +54,9 @@ def get_hub_players(scores: dict, n: int) -> list:
     Players are sorted in descending order of centrality score. The scores
     argument should be a dictionary as returned by weighted_centrality.
     """
-    
+
     return sorted(scores, key=lambda x: scores[x], reverse=True)[:n]
+
 
 def cluster_filtering(graph: WeightedDirectedGraph, threshold: float) -> WeightedDirectedGraph:
     """
@@ -44,15 +67,17 @@ def cluster_filtering(graph: WeightedDirectedGraph, threshold: float) -> Weighte
     even if they have no edges above the threshold. This ensures isolated players
     appear as their own cluster in find_clusters.
     """
-    
+
     edges = graph.get_edges()
     g = WeightedDirectedGraph()
-    for player in graph._vertices:
+    graph_vertices = graph.get_vertices()
+    for player in graph_vertices:
         g.add_vertex(player)
     for edge in edges:
         if edge[2] > threshold:
             g.add_directed_edge(edge[0], edge[1], edge[2])
     return g
+
 
 def find_clusters(graph: WeightedDirectedGraph) -> list[set]:
     """
@@ -63,27 +88,30 @@ def find_clusters(graph: WeightedDirectedGraph) -> list[set]:
     unvisited player discovers one cluster. A player with no edges will
     appear as a singleton cluster.
     """
-    
+
     clusters = []
     visited = set()
-    for player in graph._vertices:
+    graph_vertices = graph.get_vertices()
+    for player in graph_vertices:
         if player not in visited:
             cluster = set(graph.bfs(player).keys())
             clusters.append(cluster)
             visited.update(cluster)
     return clusters
 
+
 def average_path_length(graph: WeightedDirectedGraph) -> float:
     """
     Return the average shortest path length between all pairs of reachable
     vertices in the graph, measured in number of directed edges.
-    
+
     A lower value indicates a more well-connected offense where the ball
     can reach any player quickly.
     """
     total = 0
     count = 0
-    for player in graph._vertices:
+    graph_vertices = graph.get_vertices()
+    for player in graph_vertices:
         distances = graph.bfs(player)
         for distance in distances.values():
             if distance > 0:
@@ -91,15 +119,16 @@ def average_path_length(graph: WeightedDirectedGraph) -> float:
                 count += 1
     return total / count if count > 0 else 0.0
 
+
 def aggregate_possession_stats(trees: list[PossessionTree]) -> tuple[int, float]:
     """Return the average pass depth and average branching factor across all pass-sequence trees"""
     if not trees:
         return 0, 0.0
     else:
-        return _average_pass_depth_all_tree(trees), average_branching_factor_all_tree(trees)
+        return _average_pass_depth_trees(trees), average_branching_factor_trees(trees)
 
 
-def average_branching_factor_all_tree(trees: list[PossessionTree]) -> float:
+def average_branching_factor_trees(trees: list[PossessionTree]) -> float:
     """Return the mean of average branching factor across all pass-sequence trees .
 
         This is computed by taking each tree's average branching factor and then
@@ -111,7 +140,7 @@ def average_branching_factor_all_tree(trees: list[PossessionTree]) -> float:
     return avg_branching_factor / len(trees)
 
 
-def _average_pass_depth_all_tree(trees: list[PossessionTree]) -> int:
+def _average_pass_depth_trees(trees: list[PossessionTree]) -> int:
     """Return the mean of average pass depth acroos all pass-sequence trees .
 
         This is computed by taking each tree's average pass depth and then returning the mean of those values
@@ -121,3 +150,16 @@ def _average_pass_depth_all_tree(trees: list[PossessionTree]) -> int:
         avg_pass_depth += tree.average_depth()
     return int(avg_pass_depth / len(trees))
 
+
+if __name__ == '__main__':
+    import doctest
+
+    # import python_ta
+    #
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['static_type_checker'],
+    #     'extra-imports': ['csv', 'networkx'],
+    #     'allowed-io': ['load_review_graph'],
+    #     'max-nested-blocks': 4
+    # })
