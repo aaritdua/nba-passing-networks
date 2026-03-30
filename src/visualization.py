@@ -4,10 +4,10 @@ from nba_api.stats.static import teams, players
 import networkx as nx
 import plotly.graph_objects as go
 from graph import WeightedDirectedGraph, build_passing_graph
-from tree import PossessionTree as PossessionTree
-from algorithms import weighted_centrality, average_path_length, aggregate_possession_stats
+from tree import PossessionTree, build_possession_tree
+from algorithms import weighted_centrality, average_path_length, aggregate_possession_stats, get_hub_players, cluster_filtering, find_clusters
 import pandas as pd
-from data_loader import load_passing_data
+from data_loader import load_passing_data, load_game_ids, load_play_by_play
 import time
 
 def get_player_name(player_id) -> str:
@@ -50,21 +50,23 @@ def build_edge_traces(graph: WeightedDirectedGraph, positions: dict, widths: dic
         traces.append(trace)
     return traces
 
-def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dict) -> list:
+def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dict, player_cluster, colors) -> list:
     graph_nx = graph.to_networkx()
     traces = []
     for node in graph_nx.nodes():
         x, y = positions[node]
         c = scores.get(node, 0)
+        color = colors[player_cluster.get(node, 0) % len(colors)]
         trace = go.Scatter(
             x=[x],
             y=[y],
             mode='markers+text',
             text=get_player_name(node),
-            textposition='top center',
+            textposition='middle center',
+            textfont=dict(size=10, color='black'),
             hoverinfo='text',
             hovertext=f'Player: {get_player_name(node)}<br>Centrality: {c:.3f}',
-            marker=dict(size=20 + 40 * c)
+            marker=dict(size=20 + 40 * c, color=color)
         )
         traces.append(trace)
     return traces
@@ -76,9 +78,18 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
     raw_widths = {(row['PLAYER_ID'], row['PASS_TEAMMATE_PLAYER_ID']): row['PASS'] for _, row in df.iterrows()}
     edge_traces_weighted = build_edge_traces(graph, positions, weighted_widths)
     edge_traces_raw = build_edge_traces(graph, positions, raw_widths,)
-    node_traces = build_node_traces(graph, positions, scores)
+    filtered_graph = cluster_filtering(graph, threshold=200)
+    clusters = find_clusters(filtered_graph)
+    player_cluster = {}
+    for i, cluster in enumerate(clusters):
+        for player in cluster:
+            player_cluster[player] = i
+    colors = ['#e41a1c', '#377eb8', '#4daf4a', '#984ea3', '#ff7f00','#a65628', '#f781bf', '#999999', '#ffff33', '#a6cee3']
+    node_traces = build_node_traces(graph, positions, scores, player_cluster, colors)
     avg_path_length = average_path_length(graph)
     avg_pass_depth, avg_branching = aggregate_possession_stats(trees)
+    hub_players = get_hub_players(scores, 3)
+    hub_names = "<br>• " + "<br>• ".join([get_player_name(p) for p in hub_players])
     for trace in edge_traces_raw:
         trace['visible'] = False
 
@@ -139,6 +150,16 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
                 showarrow=False,
                 align="left",
                 xanchor="left"
+            ),
+            dict(
+                x=1.02,
+                y=0.6,
+                xref="paper",
+                yref="paper",
+                text=f"Hub Players: {hub_names}",
+                showarrow=False,
+                align="left",
+                xanchor="left"
             )
         ]
     )
@@ -156,9 +177,13 @@ season_options = [
 ]
 
 app.layout = html.Div([
-    dcc.Dropdown(id='team-dropdown', options=team_options, value=1610612747),
-    dcc.Dropdown(id='season-dropdown', options=season_options, value='2023-24'),
-    dcc.Graph(id='passing-graph', style={'height': '80vh'})
+    html.Div([
+        dcc.Dropdown(id='team-dropdown', options=team_options, value=1610612747, 
+                    searchable=False, style={'width': '350px'}),
+        dcc.Dropdown(id='season-dropdown', options=season_options, value='2023-24',
+                    style={'width': '150px', 'marginLeft': '10px'}),
+    ], style={'display': 'flex', 'marginTop': '10px', 'marginLeft': '10px', 'marginBottom': '10px'}),
+    dcc.Graph(id='passing-graph', style={'height': '85vh'})
 ])
 
 @app.callback(
@@ -173,7 +198,11 @@ def update_graph(team_id, season):
     try:
         df = load_passing_data(team_id, season)
         graph = build_passing_graph(df)
+        game_ids = load_game_ids(team_id, season)[:5]  # first 5 games only
         trees = []
+        for game_id in game_ids:
+            play_df = load_play_by_play(str(game_id).zfill(10))
+            trees.append(build_possession_tree(play_df))
         return build_figure(graph, trees, df)
     except Exception as e:
         print(f"Error: {e}")

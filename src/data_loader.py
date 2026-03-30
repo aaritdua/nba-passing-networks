@@ -1,4 +1,4 @@
-from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster, PlayByPlayV3
+from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster, PlayByPlayV3, leaguegamelog
 from nba_api.stats.static import teams, players
 import pandas as pd
 import time
@@ -20,6 +20,7 @@ def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
             time.sleep(0.6)
         result = pd.concat(all_data, ignore_index = True)
         result['weight'] = result['PASS'] + result['AST']
+        result = result[result['PASS'] >= 10]
         result.to_csv(f"../data/passing_{team_id}_{season}.csv")
     return result
 
@@ -32,3 +33,14 @@ def load_play_by_play(game_id: str) -> pd.DataFrame:
         result.to_csv(f"../data/playbyplay_{game_id}.csv")
     return result
 
+def load_game_ids(team_id: int, season: str) -> list[str]:
+    """Return a list of game IDs for a given team and season."""
+    cache_path = f"../data/games_{team_id}_{season}.csv"
+    try:
+        result = pd.read_csv(cache_path)
+        return result['GAME_ID'].tolist()
+    except:
+        games = leaguegamelog.LeagueGameLog(season=season).get_data_frames()[0]
+        games = games[games['TEAM_ID'] == team_id]
+        games.to_csv(cache_path)
+        return games['GAME_ID'].tolist()
