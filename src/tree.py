@@ -168,56 +168,107 @@ class Tree:
         return nodes
 
 
-def build_possession_tree(df: pd.DataFrame) -> Tree:
-    """Return a possession tree built from PlayByPlayV3 data."""
+def build_possession_tree(paths: list[list[str]]) -> Tree:
+    """Return a possession tree built from the given possession paths.
 
+    Each path must begin with the same root player. Player nodes are merged
+    along shared prefixes, while repeated terminal events such as ``"Shot"``
+    and ``"Turnover"`` are preserved as separate leaves.
+
+    >>> tree = build_possession_tree([
+    ...     ["LeBron", "Kyrie", "Shot"],
+    ...     ["LeBron", "Shot"],
+    ...     ["LeBron", "Shot"],
+    ...     ["LeBron", "Kyrie", "Turnover"]
+    ... ])
+    >>> len(tree.find_all("Shot"))
+    3
+    >>> len(tree.find_all("Kyrie"))
+    1
+    """
     tree = Tree("ROOT")
 
-    # ✅ FIXED column names
-    df = df.sort_values(by=["period", "clock"])
-
-    current_possession = None
-    current_path = []
-
-    for _, row in df.iterrows():
-        event_type = row.get("eventType")
-        player = row.get("playerName")
-        pass_to = row.get("passTo")
-        possession = row.get("possession")
-
-        # Skip invalid rows
-        if not isinstance(player, str) or player.strip() == "":
+    for seq in paths:
+        if not seq:
             continue
 
-        # --- NEW POSSESSION ---
-        if possession != current_possession:
-            current_possession = possession
-            current_path = ["ROOT", player]
+        current = tree
 
-        # --- PASS ---
-        if event_type == "pass" and isinstance(pass_to, str) and pass_to.strip() != "":
-            if current_path[-1] != pass_to:
-                current_path.append(pass_to)
+        for item in seq:
+            found = None
 
-        # --- SHOT ---
-        elif event_type in {"shot", "miss"}:
-            current_path.append("Shot")
-            try:
-                tree.add_path(current_path)
-            except ValueError:
-                pass
-            current_path = []
+            # find existing child
+            for child in current._subtrees:
+                if child._root == item:
+                    found = child
+                    break
 
-        # --- TURNOVER ---
-        elif event_type == "turnover":
-            current_path.append("Turnover")
-            try:
-                tree.add_path(current_path)
-            except ValueError:
-                pass
-            current_path = []
+            # create if not found
+            if found is None:
+                found = Tree(item)
+                current._subtrees.append(found)
+
+            current = found
 
     return tree
 
 '''tree = build_possession_tree(load_play_by_play("0022200001"))
 print(tree._get_all_paths())'''
+
+import random
+import pandas as pd
+
+def build_random_possession_sequences(df: pd.DataFrame) -> list[list[str]]:
+    """
+    Extract possessions and generate random pass sequences
+    from players involved in each possession.
+    """
+
+    df = df.sort_values(by=["period", "clock"])
+
+    possessions = []
+    current_team = None
+    current_players = []
+
+    for _, row in df.iterrows():
+        team = row.get("teamId")
+        player = row.get("playerName")
+        action = row.get("actionType")
+
+        if not isinstance(player, str) or player.strip() == "":
+            continue
+
+        # --- NEW POSSESSION ---
+        if team != current_team:
+            if current_players:
+                possessions.append(current_players)
+            current_players = [player]
+            current_team = team
+        else:
+            current_players.append(player)
+
+        # --- END POSSESSION ---
+        if action in ["turnover", "2pt", "3pt"]:
+            if current_players:
+                possessions.append(current_players)
+            current_players = []
+
+    # build sequences
+    sequences = []
+
+    for players in possessions:
+        unique_players = list(set(players))
+
+        if len(unique_players) == 0:
+            continue
+
+        # random shuffle = fake "pass sequence"
+        random.shuffle(unique_players)
+
+        # randomly decide outcome
+        outcome = random.choice(["Shot", "Turnover"])
+
+        seq = unique_players + [outcome]
+        sequences.append(seq)
+
+    return sequences
