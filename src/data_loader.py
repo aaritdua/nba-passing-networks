@@ -6,7 +6,7 @@ import time
 def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
     """
     Load passing data for all players on a given NBA team for a given season.
-    
+    ame_id
     Return a DataFrame where each row represents a passing relationship between two players
     """
     try:
@@ -32,7 +32,7 @@ def load_play_by_play(game_id: str) -> pd.DataFrame:
         result.to_csv(f"../data/playbyplay_{game_id}.csv")
     return result
 
-def load_possession_trees(game_id: str) -> list[Tree]:
+def load_possession_trees(g: str) -> list[Tree]:
     """Convert play-by-play data into a list of possession trees."""
     df = load_play_by_play(game_id)
 

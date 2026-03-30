@@ -1,4 +1,5 @@
 from graph import WeightedDirectedGraph
+from tree import Tree
 
 def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
     """
