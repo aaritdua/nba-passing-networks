@@ -1,8 +1,28 @@
+"""CSC111 Winter 2026 Project 2: Mapping the Flow
+
+Created by: Aarit Dua, Vedant Kansara, Lucas Hui
+
+Title: graph
+Description: This file contains the implementation of a weighted directed graph
+used to represent NBA passing networks, along with functions for building a
+passing graph from passing data.
+
+Copyright and Usage Information
+===============================
+
+This file is provided for educational and personal use only. You may view, download, and modify the code for your own
+non-commercial purposes, provided that proper credit is given to the original author.
+You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
+explicit written permission from the author.
+This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
+Users are responsible for reviewing and complying with those licenses.
+"""
 from __future__ import annotations
 from typing import Any
 import networkx as nx
 import pandas as pd
 from data_loader import load_passing_data
+
 
 class _WeightedDirectedVertex:
     """A vertex in a weighted directed graph representing a player
@@ -110,9 +130,9 @@ class WeightedDirectedGraph:
         v2 = self._vertices[item2]
         return v1.neighbours.get(v2, 0.0)
 
-    def get_all_vertices(self) -> set:
-        """Return a set of all vertex items in this graph. """
-        return set(self._vertices.keys())
+    def get_vertices(self) -> dict[Any, _WeightedDirectedVertex]:
+        """Return a dictionary of vertices of this graph. """
+        return self._vertices
 
     def bfs(self, start: Any) -> dict[Any, int]:
         """
@@ -186,14 +206,14 @@ class WeightedDirectedGraph:
         )
 
         return di_graph_nx
-        
+
 
 def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
     """Return a passing WEIGHTED DIRECTED graph corresponding to the given datasets.
-    
-    >>> df = data_loader.load_passing_data(1610612738, '2019-20')
+
+    >>> df = load_passing_data(1610612738, '2019-20')
     >>> g = build_passing_graph(df)
-    >>> len(g.get_all_vertices())
+    >>> len(g.get_vertices())
     17
     >>> len(g.get_out_neighbors('1628369'))
     15
@@ -220,7 +240,6 @@ def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
 
 if __name__ == '__main__':
     import doctest
-    # doctest.testmod()
 
     # import python_ta
     #
