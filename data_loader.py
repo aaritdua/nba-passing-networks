@@ -19,7 +19,7 @@ Users are responsible for reviewing and complying with those licenses.
 import time
 from nba_api.stats.endpoints import PlayerDashPtPass, CommonTeamRoster, PlayByPlayV3, leaguegamelog
 import pandas as pd
-
+import os
 
 def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
     """
@@ -71,14 +71,19 @@ def load_game_ids(team_id: int, season: str) -> list[str]:
         - team_id is a valid NBA team ID
         - season is a valid NBA season string in the format 'YYYY-YY'
     """
-    cache_path = f"../data/games_{team_id}_{season}.csv"
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    data_dir = os.path.join(base_dir, "..", "data")
+    os.makedirs(data_dir, exist_ok=True) 
+    cache_path = os.path.join(data_dir, f"games_{team_id}_{season}.csv")
     try:
         result = pd.read_csv(cache_path)
         return result['GAME_ID'].tolist()
     except FileNotFoundError:
         games = leaguegamelog.LeagueGameLog(season=season).get_data_frames()[0]
         games = games[games['TEAM_ID'] == team_id]
-        games.to_csv(cache_path)
+
+        games.to_csv(cache_path, index=False)
+
         return games['GAME_ID'].tolist()
 
 
