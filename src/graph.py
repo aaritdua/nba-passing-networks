@@ -218,7 +218,6 @@ def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
     return passing_graph
 
 
-
 if __name__ == '__main__':
     import doctest
     # doctest.testmod()
