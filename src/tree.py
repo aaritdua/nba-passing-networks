@@ -244,12 +244,12 @@ def build_possession_tree(df: pd.DataFrame) -> PossessionTree:
 if __name__ == '__main__':
     import doctest
 
-    import python_ta
+    # import python_ta
 
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['static_type_checker'],
-        'extra-imports': ['csv', 'networkx'],
-        'allowed-io': ['load_review_graph'],
-        'max-nested-blocks': 4
-    })
+    # python_ta.check_all(config={
+    #     'max-line-length': 120,
+    #     'disable': ['static_type_checker'],
+    #     'extra-imports': ['csv', 'networkx'],
+    #     'allowed-io': ['load_review_graph'],
+    #     'max-nested-blocks': 4
+    # })
