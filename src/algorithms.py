@@ -1,4 +1,5 @@
 from graph import WeightedDirectedGraph
+from tree import Tree
 
 def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
     """
@@ -119,5 +120,4 @@ def _average_pass_depth_all_tree(trees: list[Tree]) -> int:
     for tree in trees:
         avg_pass_depth += tree.average_depth()
     return int(avg_pass_depth / len(trees))
-
 

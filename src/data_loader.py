@@ -3,6 +3,8 @@ from nba_api.stats.static import teams, players
 import pandas as pd
 import time
 
+from tree import Tree
+
 def load_passing_data(team_id: int, season: str) -> pd.DataFrame:
     """
     Load passing data for all players on a given NBA team for a given season.
