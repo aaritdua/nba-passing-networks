@@ -4,7 +4,7 @@ from nba_api.stats.static import teams
 import networkx as nx
 import plotly.graph_objects as go
 from graph import WeightedDirectedGraph, build_passing_graph
-from tree import Tree as PossessionTree
+from tree import PossessionTree as PossessionTree
 from algorithms import weighted_centrality, average_path_length, aggregate_possession_stats
 import pandas as pd
 from data_loader import load_passing_data

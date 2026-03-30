@@ -31,3 +31,4 @@ def load_play_by_play(game_id: str) -> pd.DataFrame:
         result = PlayByPlayV3(game_id=game_id).get_data_frames()[0]
         result.to_csv(f"../data/playbyplay_{game_id}.csv")
     return result
+

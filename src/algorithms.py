@@ -1,5 +1,5 @@
 from graph import WeightedDirectedGraph
-from tree import Tree
+from tree import PossessionTree
 
 def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
     """
@@ -91,7 +91,7 @@ def average_path_length(graph: WeightedDirectedGraph) -> float:
                 count += 1
     return total / count if count > 0 else 0.0
 
-def aggregate_possession_stats(trees: list[Tree]) -> tuple[int, float]:
+def aggregate_possession_stats(trees: list[PossessionTree]) -> tuple[int, float]:
     """Return the average pass depth and average branching factor across all pass-sequence trees"""
     if not trees:
         return 0, 0.0
@@ -99,7 +99,7 @@ def aggregate_possession_stats(trees: list[Tree]) -> tuple[int, float]:
         return _average_pass_depth_all_tree(trees), average_branching_factor_all_tree(trees)
 
 
-def average_branching_factor_all_tree(trees: list[Tree]) -> float:
+def average_branching_factor_all_tree(trees: list[PossessionTree]) -> float:
     """Return the mean of average branching factor across all pass-sequence trees .
 
         This is computed by taking each tree's average branching factor and then
@@ -111,7 +111,7 @@ def average_branching_factor_all_tree(trees: list[Tree]) -> float:
     return avg_branching_factor / len(trees)
 
 
-def _average_pass_depth_all_tree(trees: list[Tree]) -> int:
+def _average_pass_depth_all_tree(trees: list[PossessionTree]) -> int:
     """Return the mean of average pass depth acroos all pass-sequence trees .
 
         This is computed by taking each tree's average pass depth and then returning the mean of those values
@@ -120,5 +120,4 @@ def _average_pass_depth_all_tree(trees: list[Tree]) -> int:
     for tree in trees:
         avg_pass_depth += tree.average_depth()
     return int(avg_pass_depth / len(trees))
-
 

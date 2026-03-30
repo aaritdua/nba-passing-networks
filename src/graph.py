@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import Any
 import networkx as nx
 import pandas as pd
-import data_loader
+from data_loader import load_passing_data
 
 class _WeightedDirectedVertex:
     """A vertex in a weighted directed graph representing a player
