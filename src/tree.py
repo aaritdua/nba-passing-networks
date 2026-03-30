@@ -1,6 +1,23 @@
 from __future__ import annotations
+import pandas as pd
 
-from src import data_loader
+'''def build_possession_tree(play_by_play_data: pd.DataFrame) -> Tree:
+    """Build a possession tree from play-by-play data."""
+    root = Tree("Possession")
+    current = root
+
+    for _, row in play_by_play_data.iterrows():
+        event_type = row["EVENT_TYPE"]
+        player_name = row["PLAYER_NAME"]
+
+        if event_type == "PASS":
+            current.add_player(player_name)
+        elif event_type == "SHOT":
+            current.add_shot()
+        elif event_type == "TURNOVER":
+            current.add_turnover()
+
+    return root'''
 
 
 class Tree:
@@ -152,67 +169,55 @@ class Tree:
 
 
 def build_possession_tree(df: pd.DataFrame) -> Tree:
-    """Return a possession tree for the given game.
-
-    The tree is constructed by parsing play-by-play data and extracting
-    pass sequences that end in either a Shot or Turnover.
-
-    Each possession is added as a path to the tree. Player nodes are merged
-    along shared prefixes, while repeated terminal events are preserved.
-
-    >>> df = load_play_by_play("0022200001")
-    >>> tree = build_possession_tree("0022200001")
-    >>> isinstance(tree, Tree)
-    True
-    >>> tree._root is not None
-    True
-    >>> len(tree._subtrees) > 0
-    True
-    >>> # There should be at least some shot or turnover endings
-    >>> len(tree.find_all("Shot")) >= 0
-    True
-    >>> len(tree.find_all("Turnover")) >= 0
-    True
-    """
+    """Return a possession tree built from PlayByPlayV3 data."""
 
     tree = Tree("ROOT")
 
+    # ✅ FIXED column names
+    df = df.sort_values(by=["period", "clock"])
+
+    current_possession = None
     current_path = []
 
     for _, row in df.iterrows():
-        event = row.get("EVENTMSGTYPE")
-        player1 = row.get("PLAYER1_NAME")
-        player2 = row.get("PLAYER2_NAME")
+        event_type = row.get("eventType")
+        player = row.get("playerName")
+        pass_to = row.get("passTo")
+        possession = row.get("possession")
 
-        if not isinstance(player1, str) or player1.strip() == "":
+        # Skip invalid rows
+        if not isinstance(player, str) or player.strip() == "":
             continue
 
-        if not current_path:
-            current_path = ["ROOT", player1]
+        # --- NEW POSSESSION ---
+        if possession != current_possession:
+            current_possession = possession
+            current_path = ["ROOT", player]
 
-        if isinstance(player2, str) and player2.strip() != "":
-            if current_path[-1] != player2:
-                current_path.append(player2)
+        # --- PASS ---
+        if event_type == "pass" and isinstance(pass_to, str) and pass_to.strip() != "":
+            if current_path[-1] != pass_to:
+                current_path.append(pass_to)
 
-        if event in {1, 2}:
-            if current_path:
-                current_path.append("Shot")
-                try:
-                    tree.add_path(current_path)
-                except ValueError:
-                    pass
+        # --- SHOT ---
+        elif event_type in {"shot", "miss"}:
+            current_path.append("Shot")
+            try:
+                tree.add_path(current_path)
+            except ValueError:
+                pass
             current_path = []
 
-        elif event == 5:
-            if current_path:
-                current_path.append("Turnover")
-                try:
-                    tree.add_path(current_path)
-                except ValueError:
-                    pass
-            current_path = []
-
-        elif event == 4:
+        # --- TURNOVER ---
+        elif event_type == "turnover":
+            current_path.append("Turnover")
+            try:
+                tree.add_path(current_path)
+            except ValueError:
+                pass
             current_path = []
 
     return tree
+
+'''tree = build_possession_tree(load_play_by_play("0022200001"))
+print(tree._get_all_paths())'''

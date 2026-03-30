@@ -34,3 +34,4 @@ def load_play_by_play(game_id: str) -> pd.DataFrame:
         result.to_csv(f"../data/playbyplay_{game_id}.csv")
     return result
 
+print(load_play_by_play('0022200001'))
