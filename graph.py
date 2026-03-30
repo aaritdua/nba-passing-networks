@@ -21,6 +21,7 @@ from __future__ import annotations
 from typing import Any
 import networkx as nx
 import pandas as pd
+from data_loader import load_passing_data
 
 
 class _WeightedDirectedVertex:
