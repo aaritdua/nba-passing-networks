@@ -62,7 +62,7 @@ def build_node_traces(graph: WeightedDirectedGraph, positions: dict, scores: dic
             mode='markers+text',
             text=get_player_name(node),
             textposition='middle center',
-            textfont=dict(size=10, color='black'),
+            textfont=dict(size=10, color='white'),
             hoverinfo='text',
             hovertext=f'Player: {get_player_name(node)}<br>Centrality: {c:.3f}',
             marker=dict(size=20 + 40 * c, color=color)
@@ -89,7 +89,6 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
     avg_path_length = average_path_length(graph)
     avg_pass_depth, avg_branching = aggregate_possession_stats(trees)
     hub_players = get_hub_players(scores, 3)
-    hub_names = "<br>• " + "<br>• ".join([get_player_name(p) for p in hub_players])
     for trace in edge_traces_raw:
         trace['visible'] = False
 
@@ -98,28 +97,26 @@ def build_figure(graph: WeightedDirectedGraph, trees: list[PossessionTree], df: 
         showlegend=False,
         xaxis=dict(showgrid=False, zeroline=False, visible=False),
         yaxis=dict(showgrid=False, zeroline=False, visible=False),
-        plot_bgcolor='white',
-        paper_bgcolor='white',
+        plot_bgcolor='#0f0f0f',
+        paper_bgcolor='#0f0f0f',
         margin=dict(l=20, r=220, t=20, b=20),
         shapes=[dict(
             type='rect', xref='paper', yref='paper',
             x0=0, y0=0, x1=1, y1=1,
-            line=dict(color='black', width=2)
+            line=dict(color='#2a2a2a', width=2)
         )],
         updatemenus=[dict(
             type="buttons",
+            bgcolor='#1f1f1f',
+            bordercolor='#2a2a2a',
+            borderwidth=1,
+            font=dict(color='#666666'),
             buttons=[
                 dict(label="Quality-Adjusted", method="update",
-                     args=[{"visible": [True] * len(edge_traces_weighted) + [False] * len(edge_traces_raw) + [True] * len(node_traces)}]),
+                    args=[{"visible": [True] * len(edge_traces_weighted) + [False] * len(edge_traces_raw) + [True] * len(node_traces)}]),
                 dict(label="Raw Pass Count", method="update",
-                     args=[{"visible": [False] * len(edge_traces_weighted) + [True] * len(edge_traces_raw) + [True] * len(node_traces)}])
+                    args=[{"visible": [False] * len(edge_traces_weighted) + [True] * len(edge_traces_raw) + [True] * len(node_traces)}])
             ]
-        )],
-        annotations=[
-            dict(x=1.02, y=0.9, xref="paper", yref="paper", text=f"Avg Path Length: {avg_path_length:.2f}", showarrow=False, align="left", xanchor="left"),
-            dict(x=1.02, y=0.8, xref="paper", yref="paper", text=f"Avg Pass Depth: {avg_pass_depth:.2f}", showarrow=False, align="left", xanchor="left"),
-            dict(x=1.02, y=0.7, xref="paper", yref="paper", text=f"Avg Branching Factor: {avg_branching:.2f}", showarrow=False, align="left", xanchor="left"),
-            dict(x=1.02, y=0.6, xref="paper", yref="paper", text=f"Hub Players: {hub_names}", showarrow=False, align="left", xanchor="left")
-        ]
+        )]
     )
     return figure
