@@ -19,7 +19,6 @@ def update_graph(team_id, season) -> go.Figure:
     """Return an updated passing-network figure for the selected team and season."""
     if team_id is None or season is None:
         return go.Figure()
-    time.sleep(0.5)
     try:
         df = load_passing_data(team_id, season)
         graph = build_passing_graph(df)
@@ -32,4 +31,14 @@ def update_graph(team_id, season) -> go.Figure:
     except Exception as e:
         print(f"Error: {e}")
         traceback.print_exc()
-        raise
+        return go.Figure().update_layout(
+            annotations=[dict(
+                text=f"Failed to load data. Please try again.",
+                x=0.5, y=0.5,
+                xref="paper", yref="paper",
+                showarrow=False,
+                font=dict(size=16, color="red")
+            )],
+            xaxis=dict(visible=False),
+            yaxis=dict(visible=False)
+        )
