@@ -160,9 +160,14 @@ class PossessionTree:
 def build_random_possession_sequences(df: pd.DataFrame) -> list[list[str]]:
     """Extract possessions and generate approximate pass sequences from play-by-play data.
 
-    Since PlayByPlayV3 does not record pass receivers, pass sequences within each
-    possession are approximated by shuffling the players involved. This allows
-    tree construction and computation as a proof of concept.
+    NBA's PlayByPlayV3 endpoint records which players were involved in each play
+    but does not record pass receivers. As a result, pass sequences within each
+    possession are approximated by randomly shuffling the players involved and
+    appending a randomly chosen outcome (Shot or Turnover).
+
+    This is a proof-of-concept approximation — the tree structure and derived
+    statistics (average depth, branching factor) are meaningful as measures of
+    possession complexity, but the specific pass sequences are not accurate.
     """
     df = df.sort_values(by=["period", "clock"])
     possessions = []
