@@ -95,6 +95,16 @@ app.layout = html.Div(
                     id='loading',
                     type='circle',
                     color=ORANGE,
+                    overlay_style={"visibility": "visible", "filter": "blur(2px)"},
+                    custom_spinner=html.Div([
+                        html.Div(style={
+                            'width': '40px', 'height': '40px', 'border': f'3px solid #2a2a2a',
+                            'borderTop': f'3px solid {ORANGE}', 'borderRadius': '50%',
+                            'animation': 'spin 0.8s linear infinite', 'margin': '0 auto 16px'
+                        }),
+                        html.Div('Loading passing data...', style={'color': '#ffffff', 'fontSize': '14px', 'marginBottom': '6px'}),
+                        html.Div('First load may take up to 30 seconds', style={'color': '#666666', 'fontSize': '12px'}),
+                    ], style={'textAlign': 'center'}),
                     children=dcc.Graph(
                         id='passing-graph',
                         style={'height': '100vh'},
