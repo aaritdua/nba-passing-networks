@@ -1,6 +1,6 @@
 """Entry point for the NBA Passing Networks app."""
 
-from visualization import run_visualization
+from nba_passing_networks.app.visualization import run_visualization
 
 def main():
     run_visualization()

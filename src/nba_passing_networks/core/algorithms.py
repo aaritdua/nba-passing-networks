@@ -3,8 +3,8 @@
 Includes player centrality scoring, hub detection, cluster filtering,
 average path length, and aggregate possession statistics.
 """
-from graph import WeightedDirectedGraph
-from tree import PossessionTree
+from nba_passing_networks.core.graph import WeightedDirectedGraph
+from nba_passing_networks.core.tree import PossessionTree
 
 
 def weighted_centrality(graph: WeightedDirectedGraph) -> dict:
