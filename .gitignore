@@ -211,3 +211,5 @@ data/*.csv
 
 data/
 *.zip
+
+*.egg-info/
