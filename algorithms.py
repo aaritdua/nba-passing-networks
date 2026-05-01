@@ -1,21 +1,7 @@
-"""CSC111 Winter 2026 Project 2: Mapping the Flow
+"""Graph and tree algorithms for analyzing NBA passing networks.
 
-Created by: Aarit Dua, Vedant Kansara, Lucas Hui
-
-Title: algorithms
-Description: This file contains functions for analyzing passing networks and
-possession trees, including player centrality, hub detection, clustering,
-path length, and aggregate possession statistics.
-
-Copyright and Usage Information
-===============================
-
-This file is provided for educational and personal use only. You may view, download, and modify the code for your own
-non-commercial purposes, provided that proper credit is given to the original author.
-You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
-explicit written permission from the author.
-This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
-Users are responsible for reviewing and complying with those licenses.
+Includes player centrality scoring, hub detection, cluster filtering,
+average path length, and aggregate possession statistics.
 """
 from graph import WeightedDirectedGraph
 from tree import PossessionTree
@@ -149,14 +135,3 @@ def _average_pass_depth_trees(trees: list[PossessionTree]) -> int:
     for tree in trees:
         avg_pass_depth += tree.average_depth()
     return int(avg_pass_depth / len(trees))
-
-
-if __name__ == '__main__':
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['static_type_checker'],
-        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'graph', 'tree'],
-        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
-        'max-nested-blocks': 4
-    })

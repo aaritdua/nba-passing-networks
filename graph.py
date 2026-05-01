@@ -1,21 +1,7 @@
-"""CSC111 Winter 2026 Project 2: Mapping the Flow
+"""Weighted directed graph implementation for representing NBA passing networks.
 
-Created by: Aarit Dua, Vedant Kansara, Lucas Hui
-
-Title: graph
-Description: This file contains the implementation of a weighted directed graph
-used to represent NBA passing networks, along with functions for building a
-passing graph from passing data.
-
-Copyright and Usage Information
-===============================
-
-This file is provided for educational and personal use only. You may view, download, and modify the code for your own
-non-commercial purposes, provided that proper credit is given to the original author.
-You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
-explicit written permission from the author.
-This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
-Users are responsible for reviewing and complying with those licenses.
+Includes the WeightedDirectedGraph and _WeightedDirectedVertex classes, and a
+function for building a passing graph from passing data.
 """
 from __future__ import annotations
 from typing import Any
@@ -236,16 +222,3 @@ def build_passing_graph(passing_data: pd.DataFrame) -> WeightedDirectedGraph:
         passing_graph.add_directed_edge(passer, receiver, weight)
 
     return passing_graph
-
-
-if __name__ == '__main__':
-
-    import python_ta
-
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'disable': ['static_type_checker'],
-        'extra-imports': ['csv', 'networkx', 'random', 'time', 'pandas', 'os', 'data_loader'],
-        'allowed-io': ['load_review_graph', 'load_passing_data', 'load_play_by_play', 'load_game_ids'],
-        'max-nested-blocks': 4
-    })

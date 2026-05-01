@@ -1,20 +1,7 @@
-"""CSC111 Winter 2026 Project 2: Mapping the Flow
+"""Functions for loading NBA passing and play-by-play data.
 
-Created by: Aarit Dua, Vedant Kansara, Lucas Hui
-
-Title: data_loader
-Description: This file contains functions for loading NBA passing and play-by-play data,
-either from locally saved CSV files (from the NBA API) or by retrieving it from the NBA API.
-
-Copyright and Usage Information
-===============================
-
-This file is provided for educational and personal use only. You may view, download, and modify the code for your own
-non-commercial purposes, provided that proper credit is given to the original author.
-You may not redistribute, publish, or use this project or any modified version of it for commercial purposes without
-explicit written permission from the author.
-This project may include third-party libraries, data, or tools that are subject to their own licenses and terms of use.
-Users are responsible for reviewing and complying with those licenses.
+Fetches data from the NBA API and caches results locally as CSV files
+to avoid redundant API calls.
 """
 import time
 import os
@@ -91,14 +78,3 @@ def load_game_ids(team_id: int, season: str) -> list[str]:
         games = games[games['TEAM_ID'] == team_id]
         games.to_csv(cache_path)
         return games['GAME_ID'].tolist()
-
-
-if __name__ == '__main__':
-    import python_ta
-
-    python_ta.check_all(config={
-        'max-line-length': 120,
-        'extra-imports': ['time', 'pandas', 'os', 'nba_api', 'random'],
-        'allowed-io': ['load_passing_data', 'load_play_by_play', 'load_game_ids'],
-        'max-nested-blocks': 4
-    })

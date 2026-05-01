@@ -4,5 +4,4 @@ networkx==3.6.1
 numpy==2.4.2
 pandas==3.0.1
 plotly==6.6.0
-python-ta==2.12.1
 requests==2.32.5
