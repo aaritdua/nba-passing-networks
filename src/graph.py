@@ -7,7 +7,7 @@ from __future__ import annotations
 from typing import Any
 import networkx as nx
 import pandas as pd
-from nba_passing_networks.app.data_loader import load_passing_data
+from src.data_loader import load_passing_data
 
 
 class _WeightedDirectedVertex:

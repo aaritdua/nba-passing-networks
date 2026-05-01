@@ -11,10 +11,10 @@ from nba_api.stats.static import teams, players
 import networkx as nx
 import plotly.graph_objects as go
 import pandas as pd
-from nba_passing_networks.core.graph import WeightedDirectedGraph, build_passing_graph
-from nba_passing_networks.core.tree import PossessionTree, build_possession_tree
-from nba_passing_networks.core.algorithms import weighted_centrality, average_path_length, aggregate_possession_stats, get_hub_players, cluster_filtering, find_clusters
-from nba_passing_networks.app.data_loader import load_passing_data, load_game_ids, load_play_by_play
+from src.graph import WeightedDirectedGraph, build_passing_graph
+from src.tree import PossessionTree, build_possession_tree
+from src.algorithms import weighted_centrality, average_path_length, aggregate_possession_stats, get_hub_players, cluster_filtering, find_clusters
+from src.data_loader import load_passing_data, load_game_ids, load_play_by_play
 
 
 def get_player_name(player_id: str) -> str:

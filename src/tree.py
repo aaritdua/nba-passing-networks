@@ -6,7 +6,7 @@ from play-by-play data.
 from __future__ import annotations
 import random
 import pandas as pd
-from nba_passing_networks.app.data_loader import load_play_by_play
+from src.data_loader import load_play_by_play
 
 
 class PossessionTree:
